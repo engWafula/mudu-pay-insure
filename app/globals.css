@@ -14,10 +14,23 @@
   }
 }
 
-body {
+html, body {
+  margin: 0;
+  padding: 0;
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Ensure all elements respect padding and margin */
+}
+
+#root, #__next {
+  height: 100%; /* Ensure that Next.js uses full height */
 }
 
 @layer utilities {
