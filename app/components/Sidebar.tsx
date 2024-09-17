@@ -35,8 +35,8 @@ const Sidebar = () => {
             <SidebarItem href="/dashboard" icon={<FaTachometerAlt />} text="Dashboard" />
             <SidebarItem href="/users" icon={<FaUserCheck />} text="User Management" />
             <SidebarItem href="/companies" icon={<FaClipboardList />} text="Company Management" />
-            <SidebarItem href="/settings" icon={<FaCog />} text="Policy Management" />
-            <SidebarItem href="/settings" icon={<FaCog />} text="Audit Logs" />
+            <SidebarItem href="/policy" icon={<FaCog />} text="Policy Management" />
+            <SidebarItem href="/audit" icon={<FaCog />} text="Audit Logs" />
             <SidebarItem href="/logout" icon={<MdLogout />} text="Logout" />
           </ul>
         </nav>

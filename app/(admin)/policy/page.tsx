@@ -61,15 +61,15 @@ export default function Page() {
     <div className="flex flex-col p-4 min-h-screen pl-64 pr-4">
       {/* Header and Button */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-gray-700">User Management</h2>
+        <h2 className="text-2xl font-semibold text-gray-700">Insurance Policies</h2>
         <Button type="primary" onClick={showModal}>
-          Add User
+          Add Policy
         </Button>
       </div>
 
       {/* Modal with Form inside */}
       <Modal
-        title="Add New Company"
+        title="Add New Policy"
         visible={isModalVisible}
         onCancel={handleCancel}
         footer={null} // No default footer, since we have a form submit button inside the form

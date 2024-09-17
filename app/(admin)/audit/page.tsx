@@ -61,53 +61,11 @@ export default function Page() {
     <div className="flex flex-col p-4 min-h-screen pl-64 pr-4">
       {/* Header and Button */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-gray-700">User Management</h2>
-        <Button type="primary" onClick={showModal}>
-          Add User
-        </Button>
+        <h2 className="text-2xl font-semibold text-gray-700">Audit Logs</h2>
+
       </div>
 
-      {/* Modal with Form inside */}
-      <Modal
-        title="Add New Company"
-        visible={isModalVisible}
-        onCancel={handleCancel}
-        footer={null} // No default footer, since we have a form submit button inside the form
-        centered // Centers the modal on the screen
-        className="max-w-lg" // Set a max width for the modal to ensure it doesn’t extend too wide
-      >
-        <Form layout="vertical" onFinish={onFinish}>
-          <Form.Item
-            label="Company Name"
-            name="name"
-            rules={[{ required: true, message: 'Please input the company name!' }]}
-          >
-            <Input placeholder="Enter company name" />
-          </Form.Item>
 
-          <Form.Item
-            label="Address"
-            name="address"
-            rules={[{ required: true, message: 'Please input the address!' }]}
-          >
-            <Input placeholder="Enter address" />
-          </Form.Item>
-
-          <Form.Item
-            label="Phone Number"
-            name="phoneNumber"
-            rules={[{ required: true, message: 'Please input the phone number!' }]}
-          >
-            <Input placeholder="Enter phone number" />
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit" className="w-full">
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
 
       {/* Companies Table */}
       <div className="flex-grow">
