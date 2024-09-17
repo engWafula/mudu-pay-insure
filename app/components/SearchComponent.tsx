@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Input, Dropdown, Spin } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import { useRouter } from "next/navigation"; // Import useRouter for navigation
+import { useRouter } from "next/navigation"; 
 import type { MenuProps } from "antd";
 import "tailwindcss/tailwind.css";
 
@@ -11,13 +11,12 @@ const SearchComponent = () => {
 	const [query, setQuery] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [results, setResults] = useState<{ id: number; name: string }[]>([]);
-	const router = useRouter(); // Initialize the router
+	const router = useRouter(); 
 
 	const handleSearch = async (value: string) => {
 		setQuery(value);
 		setLoading(true);
 
-		// Simulate an API call for search results
 		setTimeout(() => {
 			setResults(
 				value
@@ -32,14 +31,13 @@ const SearchComponent = () => {
 	};
 
 	const handleSelect = (key: string) => {
-		// Navigate to the details page based on the selected result's id
 		router.push(`/details/${key}`);
 	};
 
 	const menuItems: MenuProps["items"] = results.map((result) => ({
-		key: result.id.toString(), // Use id as the key
+		key: result.id.toString(), 
 		label: result.name,
-		onClick: () => handleSelect(result.id.toString()), // Handle selection
+		onClick: () => handleSelect(result.id.toString()), 
 	}));
 
 	return (
