@@ -1,49 +1,72 @@
 "use client"; // necessary for Next.js to handle the client-side rendering
 
-import React, { useState } from 'react';
-import { Table, Button, Form, Input, Modal, message } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Table, Button, Form, Input, Modal, message, Select } from 'antd';
+import { useFetch } from '@/app/hooks/useFetch';
 
-interface Company {
-  key: string;
+interface User {
+  id: string;
+  email: string;
   name: string;
-  address: string;
-  phoneNumber: string;
+  role: 'SUPER_ADMIN' | 'ADMIN'; // Adjust based on your roles
 }
 
 export default function Page() {
-  // State to hold the list of companies
-  const [companies, setCompanies] = useState<Company[]>([]);
-
+  // State to hold the list of users
+  const [users, setUsers] = useState<User[]>([]);
+  
   // State to manage modal visibility
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // Function to handle form submission and add a new company
-  const onFinish = (values: Omit<Company, 'key'>) => {
-    const newCompany: Company = {
-      key: (companies.length + 1).toString(),
-      ...values,
-    };
-    setCompanies([...companies, newCompany]);
-    message.success('Company added successfully!');
-    setIsModalVisible(false); // Close the modal after submission
+  // Fetch users using the custom hook
+  const { data: fetchedUsers, isPending, error, refetch } = useFetch<User[]>('/api/users');
+
+  useEffect(() => {
+    if (fetchedUsers) {
+      setUsers(fetchedUsers);
+    }
+  }, [fetchedUsers]);
+
+  // Function to handle form submission and add a new user
+  const onFinish = async (values: Omit<User, 'id'>) => {
+    try {
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add user');
+      }
+
+      const newUser: User = await response.json();
+      setUsers([...users, newUser]);
+      message.success('User added successfully!');
+      setIsModalVisible(false); // Close the modal after submission
+    } catch (error) {
+      message.error('Failed to add user');
+    }
   };
 
   // AntD table columns
   const columns = [
     {
-      title: 'Company Name',
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
+    },
+    {
+      title: 'Name',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Address',
-      dataIndex: 'address',
-      key: 'address',
-    },
-    {
-      title: 'Phone Number',
-      dataIndex: 'phoneNumber',
-      key: 'phoneNumber',
+      title: 'Role',
+      dataIndex: 'role',
+      key: 'role',
     },
   ];
 
@@ -69,7 +92,7 @@ export default function Page() {
 
       {/* Modal with Form inside */}
       <Modal
-        title="Add New Company"
+        title="Add New User"
         visible={isModalVisible}
         onCancel={handleCancel}
         footer={null} // No default footer, since we have a form submit button inside the form
@@ -78,27 +101,38 @@ export default function Page() {
       >
         <Form layout="vertical" onFinish={onFinish}>
           <Form.Item
-            label="Company Name"
+            label="Email"
+            name="email"
+            rules={[{ required: true, message: 'Please input the email!' }]}
+          >
+            <Input placeholder="Enter email" />
+          </Form.Item>
+
+          <Form.Item
+            label="Name"
             name="name"
-            rules={[{ required: true, message: 'Please input the company name!' }]}
+            rules={[{ required: true, message: 'Please input the name!' }]}
           >
-            <Input placeholder="Enter company name" />
+            <Input placeholder="Enter name" />
           </Form.Item>
 
           <Form.Item
-            label="Address"
-            name="address"
-            rules={[{ required: true, message: 'Please input the address!' }]}
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: 'Please input the password!' }]}
           >
-            <Input placeholder="Enter address" />
+            <Input.Password placeholder="Enter password" />
           </Form.Item>
 
           <Form.Item
-            label="Phone Number"
-            name="phoneNumber"
-            rules={[{ required: true, message: 'Please input the phone number!' }]}
+            label="Role"
+            name="role"
+            rules={[{ required: true, message: 'Please select the role!' }]}
           >
-            <Input placeholder="Enter phone number" />
+            <Select placeholder="Select role">
+              <Select.Option value="SUPER_ADMIN">Super Admin</Select.Option>
+              <Select.Option value="ADMIN">Admin</Select.Option>
+            </Select>
           </Form.Item>
 
           <Form.Item>
@@ -109,11 +143,11 @@ export default function Page() {
         </Form>
       </Modal>
 
-      {/* Companies Table */}
+      {/* Users Table */}
       <div className="flex-grow">
         <Table
           columns={columns}
-          dataSource={companies}
+          dataSource={users}
           pagination={{ pageSize: 5 }}
           bordered
           style={{ width: '100%' }}

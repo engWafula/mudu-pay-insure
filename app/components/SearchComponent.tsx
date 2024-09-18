@@ -10,34 +10,34 @@ import "tailwindcss/tailwind.css";
 const SearchComponent = () => {
 	const [query, setQuery] = useState("");
 	const [loading, setLoading] = useState(false);
-	const [results, setResults] = useState<{ id: number; name: string }[]>([]);
+	const [results, setResults] = useState<{ id: string; name: string }[]>([]);
 	const router = useRouter(); 
 
 	const handleSearch = async (value: string) => {
 		setQuery(value);
 		setLoading(true);
 
-		setTimeout(() => {
-			setResults(
-				value
-					? Array.from({ length: 5 }, (_, i) => ({
-							id: i + 1,
-							name: `${value} Result ${i + 1}`,
-					  }))
-					: []
-			);
+		try {
+			const response = await fetch(`/api/search?search=${encodeURIComponent(value)}`);
+			if (!response.ok) throw new Error("Failed to fetch");
+			const data = await response.json();
+			setResults(data.companies); // Adjust according to your API response structure
+		} catch (error) {
+			console.error("Search failed", error);
+			setResults([]);
+		} finally {
 			setLoading(false);
-		}, 1000);
+		}
 	};
 
 	const handleSelect = (key: string) => {
-		router.push(`/details/${key}`);
+		router.push(`/company/${key}`); // Navigate to the new page
 	};
 
 	const menuItems: MenuProps["items"] = results.map((result) => ({
-		key: result.id.toString(), 
+		key: result.id, 
 		label: result.name,
-		onClick: () => handleSelect(result.id.toString()), 
+		onClick: () => handleSelect(result.id), 
 	}));
 
 	return (
@@ -52,7 +52,7 @@ const SearchComponent = () => {
 				>
 					<div>
 						<Input
-							className="border-2  border-gray-400 rounded-lg shadow-lg focus:border-blue-500 focus:ring-blue-500 transition-all"
+							className="border-2 border-gray-400 rounded-lg shadow-lg focus:border-blue-500 focus:ring-blue-500 transition-all"
 							size="large"
 							placeholder="Search company..."
 							prefix={

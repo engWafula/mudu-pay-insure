@@ -42,16 +42,10 @@ export default function Header() {
         {/* Login / Sign Up Buttons */}
         <div className="hidden md:flex space-x-4">
           <Link
-            href="/login"
+            href="/signin"
             className="bg-gray-700 text-white px-5 py-2 rounded-md hover:bg-gray-600"
           >
             Login
-          </Link>
-          <Link
-            href="/signup"
-            className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-500"
-          >
-            Sign Up
           </Link>
         </div>
 

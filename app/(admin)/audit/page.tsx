@@ -1,79 +1,85 @@
 "use client"; // necessary for Next.js to handle the client-side rendering
 
-import React, { useState } from 'react';
-import { Table, Button, Form, Input, Modal, message } from 'antd';
+import React from 'react';
+import { Table, message } from 'antd';
+import { useFetch } from '@/app/hooks/useFetch';
 
-interface Company {
-  key: string;
-  name: string;
-  address: string;
-  phoneNumber: string;
+interface AuditLog {
+  id: string;
+  adminId: string;
+  action: string;
+  target: string;
+  details: string;
+  timestamp: string;
+  admin: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+  };
 }
 
 export default function Page() {
-  // State to hold the list of companies
-  const [companies, setCompanies] = useState<Company[]>([]);
-
-  // State to manage modal visibility
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  // Function to handle form submission and add a new company
-  const onFinish = (values: Omit<Company, 'key'>) => {
-    const newCompany: Company = {
-      key: (companies.length + 1).toString(),
-      ...values,
-    };
-    setCompanies([...companies, newCompany]);
-    message.success('Company added successfully!');
-    setIsModalVisible(false); // Close the modal after submission
-  };
+  const { data: auditLogs, isPending } = useFetch<AuditLog[]>('/api/audit'); // Adjust the endpoint as necessary
 
   // AntD table columns
   const columns = [
     {
-      title: 'Company Name',
-      dataIndex: 'name',
-      key: 'name',
+      title: 'Action',
+      dataIndex: 'action',
+      key: 'action',
     },
     {
-      title: 'Address',
-      dataIndex: 'address',
-      key: 'address',
+      title: 'Target',
+      dataIndex: 'target',
+      key: 'target',
     },
     {
-      title: 'Phone Number',
-      dataIndex: 'phoneNumber',
-      key: 'phoneNumber',
+      title: 'Details',
+      dataIndex: 'details',
+      key: 'details',
+    },
+    {
+      title: 'Timestamp',
+      dataIndex: 'timestamp',
+      key: 'timestamp',
+      render: (text: string) => new Date(text).toLocaleString(), // Format the timestamp
+    },
+    {
+      title: 'Admin Email',
+      dataIndex: 'admin',
+      key: 'adminEmail',
+      render: (admin: { email: string }) => admin.email, // Show admin email
+    },
+    {
+      title: 'Admin Name',
+      dataIndex: 'admin',
+      key: 'adminName',
+      render: (admin: { name: string }) => admin.name, // Show admin name
+    },
+    {
+      title: 'Admin Role',
+      dataIndex: 'admin',
+      key: 'adminRole',
+      render: (admin: { role: string }) => admin.role, // Show admin role
     },
   ];
 
-  // Function to show the modal
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
-  // Function to handle modal cancellation
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
-
   return (
     <div className="flex flex-col p-4 min-h-screen pl-64 pr-4">
-      {/* Header and Button */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold text-gray-700">Audit Logs</h2>
-
       </div>
 
-
-
-      {/* Companies Table */}
+      {/* Audit Logs Table */}
       <div className="flex-grow">
         <Table
           columns={columns}
-          dataSource={companies}
+          dataSource={auditLogs || []} // Handle loading state
           pagination={{ pageSize: 5 }}
           bordered
+          loading={isPending}
           style={{ width: '100%' }}
         />
       </div>

@@ -1,31 +1,58 @@
 "use client"; // necessary for Next.js to handle the client-side rendering
 
 import React, { useState } from 'react';
-import { Table, Button, Form, Input, Modal, message } from 'antd';
+import { Table, Button, Modal, Form, Input, message } from 'antd';
+import { useFetch } from '@/app/hooks/useFetch';
 
 interface Company {
-  key: string;
+  id: string;
   name: string;
-  address: string;
-  phoneNumber: string;
+  registrationNo: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function Page() {
-  // State to hold the list of companies
-  const [companies, setCompanies] = useState<Company[]>([]);
-
   // State to manage modal visibility
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [form] = Form.useForm();
+
+  // Fetching data using the useFetch hook
+  const { data: companies, isPending, error, refetch } = useFetch<Company[]>('/api/companies'); // Adjust the endpoint
+
+  // Function to show the modal
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  // Function to handle modal cancellation
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    form.resetFields(); // Reset the form fields when the modal is closed
+  };
 
   // Function to handle form submission and add a new company
-  const onFinish = (values: Omit<Company, 'key'>) => {
-    const newCompany: Company = {
-      key: (companies.length + 1).toString(),
-      ...values,
-    };
-    setCompanies([...companies, newCompany]);
-    message.success('Company added successfully!');
-    setIsModalVisible(false); // Close the modal after submission
+  const onFinish = async (values: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      const response = await fetch('/api/companies', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (response.ok) {
+        message.success('Company added successfully!');
+        form.resetFields(); // Reset form after successful submission
+        setIsModalVisible(false); // Close modal
+        refetch(); // Refetch the companies to update the table
+      } else {
+        throw new Error('Failed to add company');
+      }
+    } catch (error) {
+      message.error('Error adding company');
+    }
   };
 
   // AntD table columns
@@ -36,26 +63,21 @@ export default function Page() {
       key: 'name',
     },
     {
-      title: 'Address',
-      dataIndex: 'address',
-      key: 'address',
+      title: 'Registration No',
+      dataIndex: 'registrationNo',
+      key: 'registrationNo',
     },
     {
-      title: 'Phone Number',
-      dataIndex: 'phoneNumber',
-      key: 'phoneNumber',
+      title: 'Created At',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+    },
+    {
+      title: 'Updated At',
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
     },
   ];
-
-  // Function to show the modal
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
-  // Function to handle modal cancellation
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
 
   return (
     <div className="flex flex-col p-4 min-h-screen pl-64 pr-4">
@@ -67,16 +89,16 @@ export default function Page() {
         </Button>
       </div>
 
-      {/* Modal with Form inside */}
+      {/* Modal for adding a company */}
       <Modal
         title="Add New Company"
         visible={isModalVisible}
         onCancel={handleCancel}
-        footer={null} // No default footer, since we have a form submit button inside the form
-        centered // Centers the modal on the screen
-        className="max-w-lg" // Set a max width for the modal to ensure it doesn’t extend too wide
+        footer={null}
+        centered
+        className="max-w-lg"
       >
-        <Form layout="vertical" onFinish={onFinish}>
+        <Form layout="vertical" form={form} onFinish={onFinish}>
           <Form.Item
             label="Company Name"
             name="name"
@@ -86,19 +108,11 @@ export default function Page() {
           </Form.Item>
 
           <Form.Item
-            label="Address"
-            name="address"
-            rules={[{ required: true, message: 'Please input the address!' }]}
+            label="Registration No"
+            name="registrationNo"
+            rules={[{ required: true, message: 'Please input the registration number!' }]}
           >
-            <Input placeholder="Enter address" />
-          </Form.Item>
-
-          <Form.Item
-            label="Phone Number"
-            name="phoneNumber"
-            rules={[{ required: true, message: 'Please input the phone number!' }]}
-          >
-            <Input placeholder="Enter phone number" />
+            <Input placeholder="Enter registration number" />
           </Form.Item>
 
           <Form.Item>
@@ -111,13 +125,19 @@ export default function Page() {
 
       {/* Companies Table */}
       <div className="flex-grow">
-        <Table
-          columns={columns}
-          dataSource={companies}
-          pagination={{ pageSize: 5 }}
-          bordered
-          style={{ width: '100%' }}
-        />
+        {error && <p>Error: {error}</p>}
+        {isPending ? (
+          <p>Loading...</p>
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={companies as Company[]}
+            rowKey="id"
+            pagination={{ pageSize: 5 }}
+            bordered
+            style={{ width: '100%' }}
+          />
+        )}
       </div>
     </div>
   );

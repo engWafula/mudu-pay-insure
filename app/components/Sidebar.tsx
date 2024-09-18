@@ -4,9 +4,16 @@ import React, { useState } from "react";
 import { FaTachometerAlt, FaUserCheck, FaClipboardList, FaCog, FaBars } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
 import Link from "next/link"; // Ensure Next.js Link is used for navigation
+import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // Default to closed on mobile
+
+  const router = useRouter()
+  const logout = ()=>{
+    signOut({ redirect: false });
+    router.push('/');  }
 
   return (
     <div className="relative">
@@ -32,12 +39,12 @@ const Sidebar = () => {
         {/* Menu Items */}
         <nav className="mt-4">
           <ul>
-            <SidebarItem href="/dashboard" icon={<FaTachometerAlt />} text="Dashboard" />
-            <SidebarItem href="/users" icon={<FaUserCheck />} text="User Management" />
-            <SidebarItem href="/companies" icon={<FaClipboardList />} text="Company Management" />
-            <SidebarItem href="/policy" icon={<FaCog />} text="Policy Management" />
-            <SidebarItem href="/audit" icon={<FaCog />} text="Audit Logs" />
-            <SidebarItem href="/logout" icon={<MdLogout />} text="Logout" />
+            <SidebarItem onClick={()=>router.push("/dashboard")} icon={<FaTachometerAlt />} text="Dashboard" />
+            <SidebarItem   onClick={()=>router.push("/users")} icon={<FaUserCheck />} text="User Management" />
+            <SidebarItem  onClick={()=>router.push("/companies")}  icon={<FaClipboardList />} text="Company Management" />
+            <SidebarItem onClick={()=>router.push("/policy")} icon={<FaCog />} text="Policy Management" />
+            <SidebarItem onClick={()=>router.push("/audit")} icon={<FaCog />} text="Audit Logs" />
+            <SidebarItem  onClick={logout} icon={<MdLogout />} text="Logout" />
           </ul>
         </nav>
       </div>
@@ -56,18 +63,19 @@ const Sidebar = () => {
 const SidebarItem = ({
   icon,
   text,
-  href,
+  onClick,
 }: {
   icon: React.ReactNode;
   text: string;
-  href: string;
+  href?: string;
+  onClick?: ()=>void
 }) => {
   return (
-    <li className="flex items-center px-6 py-4 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+    <li onClick={onClick} className="flex items-center px-6 py-4 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors cursor-pointer">
       <span className="mr-4">{icon}</span>
-      <Link href={href}>
+      <p>
         {text}
-      </Link>
+      </p>
     </li>
   );
 };

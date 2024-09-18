@@ -1,51 +1,35 @@
-"use client"; // necessary for Next.js to handle the client-side rendering
+"use client";
 
 import React, { useState } from 'react';
-import { Table, Button, Form, Input, Modal, message } from 'antd';
+import { Table, Button, Modal, Form, Input, Select, DatePicker, message } from 'antd';
+import moment from 'moment';
+import { useFetch } from '@/app/hooks/useFetch';
 
-interface Company {
-  key: string;
-  name: string;
-  address: string;
-  phoneNumber: string;
+interface Policy {
+  id: string;
+  companyId: string;
+  policyName: string;
+  policyNumber: string;
+  insurer: string;
+  status: string;
+  expirationDate: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export default function Page() {
-  // State to hold the list of companies
-  const [companies, setCompanies] = useState<Company[]>([]);
+interface Company {
+  id: string;
+  name: string;
+}
 
+export default function PoliciesPage() {
   // State to manage modal visibility
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [form] = Form.useForm();
 
-  // Function to handle form submission and add a new company
-  const onFinish = (values: Omit<Company, 'key'>) => {
-    const newCompany: Company = {
-      key: (companies.length + 1).toString(),
-      ...values,
-    };
-    setCompanies([...companies, newCompany]);
-    message.success('Company added successfully!');
-    setIsModalVisible(false); // Close the modal after submission
-  };
-
-  // AntD table columns
-  const columns = [
-    {
-      title: 'Company Name',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Address',
-      dataIndex: 'address',
-      key: 'address',
-    },
-    {
-      title: 'Phone Number',
-      dataIndex: 'phoneNumber',
-      key: 'phoneNumber',
-    },
-  ];
+  // Fetching policies and companies using the useFetch hook
+  const { data: policies, isPending: policiesPending, error: policiesError, refetch: refetchPolicies } = useFetch<Policy[]>('/api/policies');
+  const { data: companies, isPending: companiesPending, error: companiesError } = useFetch<Company[]>('/api/companies');
 
   // Function to show the modal
   const showModal = () => {
@@ -55,50 +39,153 @@ export default function Page() {
   // Function to handle modal cancellation
   const handleCancel = () => {
     setIsModalVisible(false);
+    form.resetFields(); // Reset the form fields when the modal is closed
   };
+
+  // Function to handle form submission and add a new policy
+  const onFinish = async (values: Omit<Policy, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      const response = await fetch('/api/policies', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...values,
+          //@ts-ignore
+          expirationDate: values.expirationDate.toISOString(), // Format the date properly
+        }),
+      });
+
+      if (response.ok) {
+        message.success('Policy added successfully!');
+        form.resetFields(); // Reset form after successful submission
+        setIsModalVisible(false); // Close modal
+        refetchPolicies(); // Refetch the policies to update the table
+      } else {
+        throw new Error('Failed to add policy');
+      }
+    } catch (error) {
+      message.error('Error adding policy');
+    }
+  };
+
+  // AntD table columns
+  const columns = [
+    {
+      title: 'Policy Name',
+      dataIndex: 'policyName',
+      key: 'policyName',
+    },
+    {
+      title: 'Policy Number',
+      dataIndex: 'policyNumber',
+      key: 'policyNumber',
+    },
+    {
+      title: 'Insurer',
+      dataIndex: 'insurer',
+      key: 'insurer',
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+    },
+    {
+      title: 'Expiration Date',
+      dataIndex: 'expirationDate',
+      key: 'expirationDate',
+      render: (text: string) => moment(text).format('YYYY-MM-DD'),
+    },
+    {
+      title: 'Created At',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (text: string) => moment(text).format('YYYY-MM-DD'),
+    },
+  ];
 
   return (
     <div className="flex flex-col p-4 min-h-screen pl-64 pr-4">
       {/* Header and Button */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-gray-700">Insurance Policies</h2>
-        <Button type="primary" onClick={showModal}>
+        <h2 className="text-2xl font-semibold text-gray-700">Policy Management</h2>
+        <Button type="primary" onClick={showModal} disabled={companiesPending}>
           Add Policy
         </Button>
       </div>
 
-      {/* Modal with Form inside */}
+      {/* Modal for adding a policy */}
       <Modal
         title="Add New Policy"
         visible={isModalVisible}
         onCancel={handleCancel}
-        footer={null} // No default footer, since we have a form submit button inside the form
-        centered // Centers the modal on the screen
-        className="max-w-lg" // Set a max width for the modal to ensure it doesn’t extend too wide
+        footer={null}
+        centered
+        className="max-w-lg"
       >
-        <Form layout="vertical" onFinish={onFinish}>
+        <Form layout="vertical" form={form} onFinish={onFinish}>
+          {/* Company dropdown */}
           <Form.Item
-            label="Company Name"
-            name="name"
-            rules={[{ required: true, message: 'Please input the company name!' }]}
+            label="Company"
+            name="companyId"
+            rules={[{ required: true, message: 'Please select a company!' }]}
           >
-            <Input placeholder="Enter company name" />
+            <Select
+              placeholder="Select a company"
+              loading={companiesPending}
+              disabled={companiesPending}
+            >
+              {companies && companies.map(company => (
+                <Select.Option key={company.id} value={company.id}>
+                  {company.name}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
 
           <Form.Item
-            label="Address"
-            name="address"
-            rules={[{ required: true, message: 'Please input the address!' }]}
+            label="Policy Name"
+            name="policyName"
+            rules={[{ required: true, message: 'Please input the policy name!' }]}
           >
-            <Input placeholder="Enter address" />
+            <Input placeholder="Enter policy name" />
           </Form.Item>
 
           <Form.Item
-            label="Phone Number"
-            name="phoneNumber"
-            rules={[{ required: true, message: 'Please input the phone number!' }]}
+            label="Policy Number"
+            name="policyNumber"
+            rules={[{ required: true, message: 'Please input the policy number!' }]}
           >
-            <Input placeholder="Enter phone number" />
+            <Input placeholder="Enter policy number" />
+          </Form.Item>
+
+          <Form.Item
+            label="Insurer"
+            name="insurer"
+            rules={[{ required: true, message: 'Please input the insurer name!' }]}
+          >
+            <Input placeholder="Enter insurer name" />
+          </Form.Item>
+
+          <Form.Item
+            label="Status"
+            name="status"
+            rules={[{ required: true, message: 'Please select the policy status!' }]}
+          >
+            <Select placeholder="Select status">
+              <Select.Option value="ACTIVE">Active</Select.Option>
+              <Select.Option value="INACTIVE">Inactive</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            label="Expiration Date"
+            name="expirationDate"
+            rules={[{ required: true, message: 'Please select an expiration date!' }]}
+          >
+            <DatePicker style={{ width: '100%' }} />
           </Form.Item>
 
           <Form.Item>
@@ -109,15 +196,21 @@ export default function Page() {
         </Form>
       </Modal>
 
-      {/* Companies Table */}
+      {/* Policies Table */}
       <div className="flex-grow">
-        <Table
-          columns={columns}
-          dataSource={companies}
-          pagination={{ pageSize: 5 }}
-          bordered
-          style={{ width: '100%' }}
-        />
+        {policiesError && <p>Error: {policiesError}</p>}
+        {policiesPending ? (
+          <p>Loading...</p>
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={policies as any}
+            rowKey="id"
+            pagination={{ pageSize: 5 }}
+            bordered
+            style={{ width: '100%' }}
+          />
+        )}
       </div>
     </div>
   );
