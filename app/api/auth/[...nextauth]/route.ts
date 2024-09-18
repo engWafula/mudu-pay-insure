@@ -41,4 +41,4 @@ import { Admin } from '@prisma/client';
 
   const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST,authOptions }
+export { handler as GET, handler as POST }
