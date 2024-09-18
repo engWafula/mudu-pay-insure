@@ -12,7 +12,7 @@ const CompanyPoliciesPage = () => {
   const { data, isPending, error } = useFetch<any>(`/api/companies/${id}`); // Adjust the endpoint
 
   if (error) return <Alert message="Error" description={error} type="error" />;
-  if (!data) return <div>No policies found.</div>;
+  if (!data) return null
 
   return (
     <div className="bg-white text-gray-900 min-h-screen">

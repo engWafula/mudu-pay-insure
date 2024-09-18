@@ -41,27 +41,23 @@ const SearchComponent = () => {
 	}));
 
 	return (
-		<div className="flex w-full justify-center items-center h-[20%] my-5">
-			<div className="w-full max-w-md">
+		<div className="flex w-full justify-center items-center my-5">
+			<div className="w-full max-w-lg sm:max-w-2xl lg:max-w-4xl">
 				<Dropdown
 					menu={{ items: menuItems }}
-					open={
-						query.length > 0 && results.length > 0 && !loading
-					}
+					open={query.length > 0 && results.length > 0 && !loading}
 					trigger={["click"]}
 				>
 					<div>
 						<Input
-							className="border-2 border-gray-400 rounded-lg shadow-lg focus:border-blue-500 focus:ring-blue-500 transition-all"
+							className=" focus:border-blue-500 focus:ring-blue-500 transition-all text-lg lg:text-xl h-14 lg:h-15"
 							size="large"
 							placeholder="Search company..."
 							prefix={
-								<SearchOutlined className="text-gray-500" />
+								<SearchOutlined className="text-gray-500 text-xl" />
 							}
 							value={query}
-							onChange={(e) =>
-								handleSearch(e.target.value)
-							}
+							onChange={(e) => handleSearch(e.target.value)}
 							suffix={loading ? <Spin /> : null}
 						/>
 					</div>
