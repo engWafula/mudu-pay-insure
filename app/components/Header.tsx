@@ -3,9 +3,13 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSession,signOut } from 'next-auth/react';
+
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
+
 
   return (
     <header className="bg-gray-800 py-4">
@@ -24,29 +28,30 @@ export default function Header() {
         </div>
 
         {/* Navigation Links */}
-        <nav className="hidden md:flex space-x-8 text-lg">
-          <Link href="/" className="text-gray-300 hover:text-white">
-            Home
-          </Link>
-          <Link href="/search" className="text-gray-300 hover:text-white">
-            Search Insurance
-          </Link>
-          <Link href="/about" className="text-gray-300 hover:text-white">
-            About Us
-          </Link>
-          <Link href="/contact" className="text-gray-300 hover:text-white">
-            Contact
-          </Link>
-        </nav>
+
 
         {/* Login / Sign Up Buttons */}
         <div className="hidden md:flex space-x-4">
-          <Link
-            href="/signin"
-            className="bg-gray-700 text-white px-5 py-2 rounded-md hover:bg-gray-600"
-          >
-            Login
-          </Link>
+        {status === "authenticated" ? (
+            <>
+              <span className="text-gray-300">Welcome, {session.user?.name || 'User'}</span>
+              <button
+                onClick={() => signOut()}
+                className="bg-gray-700 text-white px-5 py-2 rounded-md hover:bg-gray-600"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/signin"
+                className="bg-gray-700 text-white px-5 py-2 rounded-md hover:bg-gray-600"
+              >
+                Login
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -84,7 +89,7 @@ export default function Header() {
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
         <nav className="md:hidden mt-4 px-4 space-y-2 text-lg">
-          <Link href="/" className="block text-gray-300 hover:text-white">
+          {/* <Link href="/" className="block text-gray-300 hover:text-white">
             Home
           </Link>
           <Link href="/search" className="block text-gray-300 hover:text-white">
@@ -95,20 +100,28 @@ export default function Header() {
           </Link>
           <Link href="/contact" className="block text-gray-300 hover:text-white">
             Contact
-          </Link>
+          </Link> */}
           <div className="flex flex-col space-y-2 mt-4">
-            <Link
-              href="/login"
-              className="bg-gray-700 text-white px-5 py-2 rounded-md hover:bg-gray-600 text-center"
-            >
-              Login
-            </Link>
-            <Link
-              href="/signup"
-              className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-500 text-center"
-            >
-              Sign Up
-            </Link>
+            {status === "authenticated" ? (
+            <>
+              <span className="text-gray-300">Welcome, {session.user?.name || 'User'}</span>
+              <button
+                onClick={() => signOut()}
+                className="bg-gray-700 text-white px-5 py-2 rounded-md hover:bg-gray-600"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/signin"
+                className="bg-gray-700 text-white px-5 py-2 rounded-md hover:bg-gray-600 text-center"
+                >
+                Login
+              </Link>
+            </>
+          )}
           </div>
         </nav>
       )}

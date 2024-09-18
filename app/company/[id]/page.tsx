@@ -1,68 +1,56 @@
-// app/company/[id]/page.tsx
 "use client";
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Spin, Table, Alert } from "antd";
+import { useParams } from "next/navigation";
+import { Spin, Card, Alert } from "antd";
 import { useFetch } from "@/app/hooks/useFetch";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 
+const { Meta } = Card;
+
 const CompanyPoliciesPage = () => {
-  const router = useRouter();
   const { id } = useParams(); // Get company ID from URL
-  const [loading, setLoading] = useState(true);
-
-  const { data, isPending, error, refetch } = useFetch<any[]>(
-    `/api/companies/${id}`
-  ); // Adjust the endpoint
-
-  const columns = [
-    {
-      title: "Policy Name",
-      dataIndex: "policyName",
-      key: "policyName",
-    },
-    {
-      title: "Policy Number",
-      dataIndex: "policyNumber",
-      key: "policyNumber",
-    },
-    {
-      title: "Insurer",
-      dataIndex: "insurer",
-      key: "insurer",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-    },
-    {
-      title: "Expiration Date",
-      dataIndex: "expirationDate",
-      key: "expirationDate",
-      render: (date: string) => new Date(date).toLocaleDateString(),
-    },
-  ];
+  const { data, isPending, error } = useFetch<any>(`/api/companies/${id}`); // Adjust the endpoint
 
   if (error) return <Alert message="Error" description={error} type="error" />;
   if (!data) return <div>No policies found.</div>;
-  console.log(data, "fhfhf");
+
   return (
-		<div className="  bg-white text-gray-900">
+    <div className="bg-white text-gray-900 min-h-screen">
       <Header />
 
-      <h1 className="text-2xl font-semibold mb-4">
-        Policies for Company ID: {id}
-      </h1>
-      <Table
-        dataSource={data}
-        columns={columns}
-        rowKey="id"
-        loading={isPending}
-        scroll={{ x: true }} // Enable horizontal scrolling if needed
-        className="ant-table-small"
-      />
+      <div className="container mx-auto px-4">
+        <p className="text-2xl font-semibold mb-4  mt-10 text-center">
+         Insurance Policies for {data.name}
+        </p>
+
+        {isPending && <Spin size="large" className="flex justify-center items-center my-8" />}
+
+        {data.length === 0 && !isPending && (
+          <div className="text-center text-gray-500 my-8 ">No policies available.</div>
+        )}
+
+        <div className="flex flex-wrap justify-center gap-4 p-8">
+          {data.policies.map((policy:any) => (
+            <Card
+              key={policy.id}
+              title={`Policy Name: ${policy.policyName}`}
+              bordered={true}
+              className="w-full max-w-sm shadow-lg hover:shadow-xl transition-shadow duration-300"
+              cover={
+                <div className="p-4 bg-gray-50 rounded-t-md">
+                  <p className="text-sm text-gray-600">Policy Number: {policy.policyNumber}</p>
+                  <p className="text-sm text-gray-600">Status: {policy.status}</p>
+                  <p className="text-sm text-gray-600">Expiration Date: {new Date(policy.expirationDate).toLocaleDateString()}</p>
+                </div>
+              }
+            >
+              <Meta
+                description={`Issued by ${policy.insurer}`}
+              />
+            </Card>
+          ))}
+        </div>
+      </div>
 
       <Footer />
     </div>

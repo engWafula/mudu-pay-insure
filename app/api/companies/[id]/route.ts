@@ -12,7 +12,7 @@ export async function GET(req: NextRequest,{ params }: { params: { planId: strin
       },
     });
       
-    const data = info?.policies
+    const data = info
 
   return NextResponse.json(data, { status: 201 });
 
