@@ -1,11 +1,21 @@
+import { logAction } from "@/app/lib/auditLog";
+import { authOptions } from "@/app/lib/authOptions";
 import { db } from "@/app/lib/prisma";
 import { Admin } from "@prisma/client";
 import bcrypt from "bcrypt";
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 // Function to handle admin creation with roles
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+  
+    if (!session) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    
+
     const body = await req.json();
     const { email, name, password, role } = body;
 
@@ -43,6 +53,23 @@ export async function POST(req: Request) {
         role: userRole  // Save role in database
       }
     });
+
+    
+    const admin = await db.admin.findFirst({
+      where:{
+          //@ts-ignore
+          email:session.email
+      }
+  })
+
+
+    await logAction(
+      //@ts-ignore
+         admin.id,
+         'CREATE',
+         `User created: ${createdUser.id}`,
+         `Created new user with Name ${createdUser.name}`
+       );
 
     return NextResponse.json(createdUser, { status: 201 });
   } catch (error) {

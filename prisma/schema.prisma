@@ -49,8 +49,8 @@ model Admin {
 
 model AuditLog {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  admin     Admin    @relation(fields: [adminId], references: [id])
-  adminId   String   @db.ObjectId
+  admin     Admin?    @relation(fields: [adminId], references: [id])
+  adminId   String?   @db.ObjectId
   action    String   // e.g., 'CREATE', 'UPDATE', 'DELETE'
   target    String   // The entity being modified (e.g., Policy ID or Company ID)
   details   String   // Additional details about the action

@@ -81,7 +81,7 @@ export async function POST(req: Request) {
 export const GET = async (req: NextRequest,res:NextResponse) => {
     try {
       const data = await db.policy.findMany()
-  
+    
       return NextResponse.json(data, { status: 201 });
     } catch (error:any) {
       // Handle errors, like unique constraint violations
