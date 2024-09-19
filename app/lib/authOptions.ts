@@ -31,5 +31,25 @@ export const authOptions: NextAuthOptions = {
           return null;
         },
       }),
-    ]
+    ],
+    callbacks: {
+      // Add role to the JWT token
+      async jwt({ token, user }) {
+        if (user) {
+          token.role = (user as Admin).role;  // Attach the role to the token
+        }
+        return token;
+      },
+      // Add role to the session
+      async session({ session, token }) {
+        if (token) {
+          //@ts-ignore
+          session.user.role = token.role as string;  // Attach role from JWT token to session.user
+
+          // session?.user?.role = token?.role;  // Add role from the token to the session
+          console.log(session,"+++++++++++>>>>>>>>>>>>>>")
+        }
+        return session;
+      },
+    },
   };
