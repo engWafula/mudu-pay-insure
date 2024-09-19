@@ -12,13 +12,9 @@ interface User {
 }
 
 export default function Page() {
-  // State to hold the list of users
   const [users, setUsers] = useState<User[]>([]);
-
-  // State to manage modal visibility
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // Fetch users using the custom hook
   const { data: fetchedUsers, isPending, error, refetch } = useFetch<User[]>('/api/users');
 
   useEffect(() => {
@@ -27,7 +23,6 @@ export default function Page() {
     }
   }, [fetchedUsers]);
 
-  // Function to handle form submission and add a new user
   const onFinish = async (values: Omit<User, 'id'>) => {
     try {
       const response = await fetch('/api/signup', {
@@ -45,13 +40,12 @@ export default function Page() {
       const newUser: User = await response.json();
       setUsers([...users, newUser]);
       message.success('User added successfully!');
-      setIsModalVisible(false); // Close the modal after submission
+      setIsModalVisible(false);
     } catch (error) {
       message.error('Failed to add user');
     }
   };
 
-  // AntD table columns
   const columns = [
     {
       title: 'Email',
@@ -70,23 +64,21 @@ export default function Page() {
     },
   ];
 
-  // Function to show the modal
   const showModal = () => {
     setIsModalVisible(true);
   };
 
-  // Function to handle modal cancellation
   const handleCancel = () => {
     setIsModalVisible(false);
   };
 
   return (
-    <div className="flex flex-col p-2">
+    <div className="flex flex-col justify-start p-2">
       {/* Header and Button */}
-      <h2 className="text-2xl font-semibold text-gray-700 mt-10">Users</h2>
+      <h2 className="text-2xl font-semibold text-gray-700 mt-10 overflow-hidden">Users</h2>
 
       <div className="mt-5">
-        <div className="flex items-center justify-between mb-4 mt-5">
+        <div className="flex items-center justify-between mb-4 mt-5 overflow-hidden">
           <Button type="primary" onClick={showModal}>
             Add User
           </Button>
@@ -97,9 +89,9 @@ export default function Page() {
           title="Add New User"
           visible={isModalVisible}
           onCancel={handleCancel}
-          footer={null} // No default footer, since we have a form submit button inside the form
-          centered // Centers the modal on the screen
-          className="max-w-lg w-full sm:max-w-full sm:w-11/12" // Make modal responsive
+          footer={null}
+          centered
+          className="max-w-lg w-full sm:max-w-full sm:w-11/12"
         >
           <Form layout="vertical" onFinish={onFinish}>
             <Form.Item
@@ -147,18 +139,20 @@ export default function Page() {
 
         {/* Users Table */}
         <div className="flex-grow flex justify-center mt-5">
-          <div className="w-full overflow-x-auto">
-            <div className="min-w-[600px]">
-              <Table
-                columns={columns}
-                dataSource={users}
-                pagination={{ pageSize: 5 }}
-                className="mx-auto" // Center the table
-                scroll={{x:true}}
-              />
-            </div>
-          </div>
+
+        <div className="w-full overflow-x-auto"> 
+        <div className="min-w-[100px]">
+
+          <Table
+            columns={columns}
+            dataSource={users}
+            pagination={{ pageSize: 10 }}
+            scroll={{ x: true }} 
+          />
         </div>
+        </div>
+        </div>
+
       </div>
     </div>
   );

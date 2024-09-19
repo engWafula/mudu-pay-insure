@@ -107,10 +107,11 @@ export default function PoliciesPage() {
   ];
 
   return (
-    <div className="flex flex-col p-4 min-h-screen pl-64 pr-4">
+    <div className="flex flex-col justify-start p-2">
       {/* Header and Button */}
+      <h2 className="text-2xl font-semibold text-gray-700 mt-10 overflow-hidden">Policies</h2>
+       <div className='mt-5'>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-gray-700">Policy Management</h2>
         <Button type="primary" onClick={showModal} disabled={companiesPending}>
           Add Policy
         </Button>
@@ -198,20 +199,17 @@ export default function PoliciesPage() {
 
       {/* Policies Table */}
       <div className="flex-grow">
-        {policiesError && <p>Error: {policiesError}</p>}
-        {policiesPending ? (
-          <p>Loading...</p>
-        ) : (
           <Table
             columns={columns}
             dataSource={policies as any}
             rowKey="id"
             pagination={{ pageSize: 5 }}
-            bordered
             style={{ width: '100%' }}
+            loading={policiesPending}
           />
-        )}
       </div>
+      </div>
+
     </div>
   );
 }

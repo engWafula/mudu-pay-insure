@@ -80,9 +80,10 @@ export default function Page() {
   ];
 
   return (
-    <div className="flex flex-col p-2 min-h-screen lg:pl-64 lg:pr-4">
+    <div className="flex flex-col justify-start p-2">
       {/* Header and Button */}
-      <h2 className="text-2xl font-semibold text-gray-700 mt-10">Companies</h2>
+      <h2 className="text-2xl font-semibold text-gray-700 mt-10 overflow-hidden">Companies</h2>
+      <div className="mt-5">
 
       <div className="flex items-center justify-between mb-4">
         <Button type="primary" onClick={showModal}>
@@ -126,19 +127,17 @@ export default function Page() {
 
       {/* Companies Table */}
       <div className="flex-grow">
-        {error && <p>Error: {error}</p>}
-        {isPending ? (
-          <p>Loading...</p>
-        ) : (
           <Table
             columns={columns}
             dataSource={companies as Company[]}
             rowKey="id"
             pagination={{ pageSize: 5 }}
-            bordered
+            scroll={{ x: true }} 
+            loading={isPending}
           />
-        )}
       </div>
     </div>
+    </div>
+
   );
 }

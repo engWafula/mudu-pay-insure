@@ -66,11 +66,11 @@ export default function Page() {
   ];
 
   return (
-    <div className="flex flex-col p-4 min-h-screen pl-64 pr-4">
+    <div className="flex flex-col justify-start p-2">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-gray-700">Audit Logs</h2>
-      </div>
+      <h2 className="text-2xl font-semibold text-gray-700 mt-10 overflow-hidden mb-5">Policies</h2>
+
+
 
       {/* Audit Logs Table */}
       <div className="flex-grow">
@@ -78,9 +78,9 @@ export default function Page() {
           columns={columns}
           dataSource={auditLogs || []} // Handle loading state
           pagination={{ pageSize: 5 }}
-          bordered
           loading={isPending}
           style={{ width: '100%' }}
+
         />
       </div>
     </div>
