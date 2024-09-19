@@ -1,6 +1,6 @@
 "use client"; // Ensure this is at the top for Next.js
 import React, { useState } from "react";
-import { FaTachometerAlt, FaUserCheck, FaClipboardList, FaCog, FaBars } from "react-icons/fa";
+import { FaTachometerAlt, FaUserCheck, FaClipboardList, FaCog, FaBars,FaBook,FaFileContract,FaBriefcase } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
 import Link from "next/link"; // Ensure Next.js Link is used for navigation
 import { useRouter } from "next/navigation";
@@ -44,9 +44,9 @@ const Sidebar = () => {
             <SidebarItem onClick={()=>router.push("/dashboard")} icon={<FaTachometerAlt />} text="Dashboard" />
             {userRole ==="SUPER_ADMIN" && <SidebarItem   onClick={()=>router.push("/users")} icon={<FaUserCheck />} text="User Management" />}
             <SidebarItem  onClick={()=>router.push("/companies")}  icon={<FaClipboardList />} text="Company Management" />
-            <SidebarItem onClick={()=>router.push("/insurers")} icon={<FaCog />} text="Insurance Comapanies" />
-            <SidebarItem onClick={()=>router.push("/policy")} icon={<FaCog />} text="Policy Management" />
-            {userRole ==="SUPER_ADMIN" &&<SidebarItem onClick={()=>router.push("/audit")} icon={<FaCog />} text="Audit Logs" />}
+            <SidebarItem onClick={()=>router.push("/insurers")} icon={<FaBriefcase />} text="Insurance Comapanies" />
+            <SidebarItem onClick={()=>router.push("/policy")} icon={<FaFileContract />} text="Policy Management" />
+            {userRole ==="SUPER_ADMIN" &&<SidebarItem onClick={()=>router.push("/audit")} icon={<FaBook />} text="Audit Logs" />}
             <SidebarItem  onClick={logout} icon={<MdLogout />} text="Logout" />
           </ul>
         </nav>
