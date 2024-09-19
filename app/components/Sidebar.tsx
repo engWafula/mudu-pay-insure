@@ -19,7 +19,7 @@ const Sidebar = () => {
     <div className="relative">
       {/* Toggle Button for Mobile View */}
       <button
-        className="md:hidden text-white p-4 bg-[#1F2937] fixed top-0 left-0 z-50"
+        className="md:hidden text-[#1F2937] p-4  fixed top-0 left-0 z-50"
         onClick={() => setIsOpen(!isOpen)}
       >
         <FaBars />

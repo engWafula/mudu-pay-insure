@@ -14,7 +14,7 @@ interface User {
 export default function Page() {
   // State to hold the list of users
   const [users, setUsers] = useState<User[]>([]);
-  
+
   // State to manage modal visibility
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -81,77 +81,84 @@ export default function Page() {
   };
 
   return (
-    <div className="flex flex-col p-4 min-h-screen pl-64 pr-4">
+    <div className="flex flex-col p-2">
       {/* Header and Button */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-gray-700">User Management</h2>
-        <Button type="primary" onClick={showModal}>
-          Add User
-        </Button>
-      </div>
+      <h2 className="text-2xl font-semibold text-gray-700 mt-10">Users</h2>
 
-      {/* Modal with Form inside */}
-      <Modal
-        title="Add New User"
-        visible={isModalVisible}
-        onCancel={handleCancel}
-        footer={null} // No default footer, since we have a form submit button inside the form
-        centered // Centers the modal on the screen
-        className="max-w-lg" // Set a max width for the modal to ensure it doesn’t extend too wide
-      >
-        <Form layout="vertical" onFinish={onFinish}>
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[{ required: true, message: 'Please input the email!' }]}
-          >
-            <Input placeholder="Enter email" />
-          </Form.Item>
+      <div className="mt-5">
+        <div className="flex items-center justify-between mb-4 mt-5">
+          <Button type="primary" onClick={showModal}>
+            Add User
+          </Button>
+        </div>
 
-          <Form.Item
-            label="Name"
-            name="name"
-            rules={[{ required: true, message: 'Please input the name!' }]}
-          >
-            <Input placeholder="Enter name" />
-          </Form.Item>
+        {/* Modal with Form inside */}
+        <Modal
+          title="Add New User"
+          visible={isModalVisible}
+          onCancel={handleCancel}
+          footer={null} // No default footer, since we have a form submit button inside the form
+          centered // Centers the modal on the screen
+          className="max-w-lg w-full sm:max-w-full sm:w-11/12" // Make modal responsive
+        >
+          <Form layout="vertical" onFinish={onFinish}>
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[{ required: true, message: 'Please input the email!' }]}
+            >
+              <Input placeholder="Enter email" />
+            </Form.Item>
 
-          <Form.Item
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: 'Please input the password!' }]}
-          >
-            <Input.Password placeholder="Enter password" />
-          </Form.Item>
+            <Form.Item
+              label="Name"
+              name="name"
+              rules={[{ required: true, message: 'Please input the name!' }]}
+            >
+              <Input placeholder="Enter name" />
+            </Form.Item>
 
-          <Form.Item
-            label="Role"
-            name="role"
-            rules={[{ required: true, message: 'Please select the role!' }]}
-          >
-            <Select placeholder="Select role">
-              <Select.Option value="SUPER_ADMIN">Super Admin</Select.Option>
-              <Select.Option value="ADMIN">Admin</Select.Option>
-            </Select>
-          </Form.Item>
+            <Form.Item
+              label="Password"
+              name="password"
+              rules={[{ required: true, message: 'Please input the password!' }]}
+            >
+              <Input.Password placeholder="Enter password" />
+            </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit" className="w-full">
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+            <Form.Item
+              label="Role"
+              name="role"
+              rules={[{ required: true, message: 'Please select the role!' }]}
+            >
+              <Select placeholder="Select role">
+                <Select.Option value="SUPER_ADMIN">Super Admin</Select.Option>
+                <Select.Option value="ADMIN">Admin</Select.Option>
+              </Select>
+            </Form.Item>
 
-      {/* Users Table */}
-      <div className="flex-grow">
-        <Table
-          columns={columns}
-          dataSource={users}
-          pagination={{ pageSize: 5 }}
-          bordered
-          style={{ width: '100%' }}
-        />
+            <Form.Item>
+              <Button type="primary" htmlType="submit" className="w-full">
+                Submit
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        {/* Users Table */}
+        <div className="flex-grow flex justify-center mt-5">
+          <div className="w-full overflow-x-auto">
+            <div className="min-w-[600px]">
+              <Table
+                columns={columns}
+                dataSource={users}
+                pagination={{ pageSize: 5 }}
+                className="mx-auto" // Center the table
+                scroll={{x:true}}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

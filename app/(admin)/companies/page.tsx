@@ -80,10 +80,11 @@ export default function Page() {
   ];
 
   return (
-    <div className="flex flex-col p-4 min-h-screen pl-64 pr-4">
+    <div className="flex flex-col p-2 min-h-screen lg:pl-64 lg:pr-4">
       {/* Header and Button */}
+      <h2 className="text-2xl font-semibold text-gray-700 mt-10">Companies</h2>
+
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-gray-700">Company Management</h2>
         <Button type="primary" onClick={showModal}>
           Add Company
         </Button>
@@ -135,7 +136,6 @@ export default function Page() {
             rowKey="id"
             pagination={{ pageSize: 5 }}
             bordered
-            style={{ width: '100%' }}
           />
         )}
       </div>
