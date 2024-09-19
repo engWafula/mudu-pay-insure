@@ -3,15 +3,15 @@ import { logAction } from '@/app/lib/auditLog';
 import { db } from '@/app/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from "next-auth";
-// import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 
 export async function POST(req: Request) {
-    // const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions);
   
-    // if (!session) {
-    //     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    //   }
+    if (!session) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
     
 
   try {
@@ -59,13 +59,13 @@ export async function POST(req: Request) {
         }
     })
 
-    //    await logAction(
-    //  //@ts-ignore
-    //     admin.id,
-    //     'CREATE',
-    //     `Policy ID ${policy.id}`,
-    //     `Created new policy with ID ${policy.id}`
-    //   );
+       await logAction(
+     //@ts-ignore
+        admin.id,
+        'CREATE',
+        `Policy ID ${policy.id}`,
+        `Created new policy with ID ${policy.id}`
+      );
 
     return NextResponse.json(policy, { status: 201 });
   } catch (error) {
