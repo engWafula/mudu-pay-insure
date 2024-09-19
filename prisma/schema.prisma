@@ -17,6 +17,18 @@ model Company {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
+model Insurer {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  registrationId String    @unique  
+  phoneNumber    String?             
+  address        String?            
+  website        String?             
+  contactPerson  String?  
+   policies       Policy[]           
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
 
 model Policy {
   id             String       @id @default(auto()) @map("_id") @db.ObjectId
@@ -24,12 +36,16 @@ model Policy {
   companyId      String       @db.ObjectId
   policyName String
   policyNumber   String       @unique
-  insurer        String
+  insurer        Insurer?      @relation(fields: [insurerId], references: [id])
+  insurerId      String?       @db.ObjectId 
   status         PolicyStatus
   expirationDate DateTime
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 }
+
+
+
 
 enum Role {
   SUPER_ADMIN

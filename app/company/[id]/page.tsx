@@ -45,7 +45,7 @@ const CompanyPoliciesPage = () => {
               }
             >
               <Meta
-                description={`Issued by ${policy.insurer}`}
+                description={`Issued by ${policy.insurer.name}`}
               />
             </Card>
           ))}

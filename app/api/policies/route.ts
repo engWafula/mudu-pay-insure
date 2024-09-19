@@ -16,10 +16,9 @@ export async function POST(req: Request) {
 
   try {
     // Parse the request body
-    const { companyId, policyNumber, insurer, status, expirationDate,policyName } = await req.json();
-
-    // Check if the required fields are provided
-    if (!companyId || !policyNumber || !insurer || !status || !expirationDate) {
+    const { companyId, policyNumber, status, expirationDate,policyName,insurerId } = await req.json();
+    // Check if the  required fields are provided
+    if (!companyId || !policyNumber || !insurerId || !status || !expirationDate) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -45,7 +44,7 @@ export async function POST(req: Request) {
       data: {
         companyId,
         policyNumber,
-        insurer,
+        insurerId,
         status,
         policyName,
         expirationDate: new Date(expirationDate),
@@ -80,13 +79,17 @@ export async function POST(req: Request) {
 
 export const GET = async (req: NextRequest,res:NextResponse) => {
     try {
-      const data = await db.policy.findMany()
-    
+      const data = await db.policy.findMany({
+        include:{
+          insurer:true,
+          company:true
+        }
+      })
       return NextResponse.json(data, { status: 201 });
     } catch (error:any) {
       // Handle errors, like unique constraint violations
       return NextResponse.json(
-        { error: 'Error creating company', details: error.message  },
+        { error: 'Error fetching', details: error.message  },
         { status: 500 }
       );
     }

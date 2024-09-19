@@ -1,5 +1,4 @@
 "use client"; // Ensure this is at the top for Next.js
-//@ts-nocheck
 import React, { useState } from "react";
 import { FaTachometerAlt, FaUserCheck, FaClipboardList, FaCog, FaBars } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
@@ -10,6 +9,8 @@ import { signOut, useSession } from "next-auth/react";
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // Default to closed on mobile
   const { data: session, status } = useSession();
+   // @ts-ignore
+   const userRole = status === "authenticated" ? (session as any).user.role : undefined;
 
   const router = useRouter()
   const logout = ()=>{
@@ -41,10 +42,11 @@ const Sidebar = () => {
         <nav className="mt-4">
           <ul>
             <SidebarItem onClick={()=>router.push("/dashboard")} icon={<FaTachometerAlt />} text="Dashboard" />
-            {session?.user && session.user?.role ==="SUPER_ADMIN" && <SidebarItem   onClick={()=>router.push("/users")} icon={<FaUserCheck />} text="User Management" />}
+            {userRole ==="SUPER_ADMIN" && <SidebarItem   onClick={()=>router.push("/users")} icon={<FaUserCheck />} text="User Management" />}
             <SidebarItem  onClick={()=>router.push("/companies")}  icon={<FaClipboardList />} text="Company Management" />
+            <SidebarItem onClick={()=>router.push("/insurers")} icon={<FaCog />} text="Insurance Comapanies" />
             <SidebarItem onClick={()=>router.push("/policy")} icon={<FaCog />} text="Policy Management" />
-            {session?.user && session.user?.role ==="SUPER_ADMIN" &&<SidebarItem onClick={()=>router.push("/audit")} icon={<FaCog />} text="Audit Logs" />}
+            {userRole ==="SUPER_ADMIN" &&<SidebarItem onClick={()=>router.push("/audit")} icon={<FaCog />} text="Audit Logs" />}
             <SidebarItem  onClick={logout} icon={<MdLogout />} text="Logout" />
           </ul>
         </nav>

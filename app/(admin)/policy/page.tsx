@@ -1,5 +1,5 @@
 "use client";
-
+//@ts-ignore
 import React, { useState } from 'react';
 import { Table, Button, Modal, Form, Input, Select, DatePicker, message } from 'antd';
 import moment from 'moment';
@@ -10,7 +10,7 @@ interface Policy {
   companyId: string;
   policyName: string;
   policyNumber: string;
-  insurer: string;
+  insurerId: string;
   status: string;
   expirationDate: string;
   createdAt: string;
@@ -22,14 +22,20 @@ interface Company {
   name: string;
 }
 
+interface Insurer {
+  id: string;
+  name: string;
+}
+
 export default function PoliciesPage() {
   // State to manage modal visibility
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
 
-  // Fetching policies and companies using the useFetch hook
-  const { data: policies, isPending: policiesPending, error: policiesError, refetch: refetchPolicies } = useFetch<Policy[]>('/api/policies');
-  const { data: companies, isPending: companiesPending, error: companiesError } = useFetch<Company[]>('/api/companies');
+  // Fetching policies, companies, and insurers using the useFetch hook
+  const { data: policies, isPending: policiesPending, refetch: refetchPolicies } = useFetch<Policy[]>('/api/policies');
+  const { data: companies, isPending: companiesPending } = useFetch<Company[]>('/api/companies');
+  const { data: insurers, isPending: insurersPending } = useFetch<Insurer[]>('/api/insurer');
 
   // Function to show the modal
   const showModal = () => {
@@ -52,8 +58,7 @@ export default function PoliciesPage() {
         },
         body: JSON.stringify({
           ...values,
-          //@ts-ignore
-          expirationDate: values.expirationDate.toISOString(), // Format the date properly
+          expirationDate: values.expirationDate?.toString(), // Format the date properly
         }),
       });
 
@@ -83,9 +88,21 @@ export default function PoliciesPage() {
       key: 'policyNumber',
     },
     {
+      title: 'Company',
+      dataIndex: 'company',
+      key: 'company',
+      render: (company: any) => {
+        return company.name
+      },
+    },
+    {
       title: 'Insurer',
-      dataIndex: 'insurer',
-      key: 'insurer',
+      dataIndex: 'insurerId',
+      key: 'insurerId',
+      render: (insurerId: string) => {
+        const insurer = insurers?.find(ins => ins.id === insurerId);
+        return insurer ? insurer.name : 'Unknown';
+      },
     },
     {
       title: 'Status',
@@ -110,95 +127,106 @@ export default function PoliciesPage() {
     <div className="flex flex-col justify-start p-2">
       {/* Header and Button */}
       <h2 className="text-2xl font-semibold text-gray-700 mt-10 overflow-hidden">Policies</h2>
-       <div className='mt-5'>
-      <div className="flex items-center justify-between mb-4">
-        <Button type="primary" onClick={showModal} disabled={companiesPending}>
-          Add Policy
-        </Button>
-      </div>
+      <div className="mt-5">
+        <div className="flex items-center justify-between mb-4">
+          <Button type="primary" onClick={showModal} disabled={companiesPending || insurersPending}>
+            Add Policy
+          </Button>
+        </div>
 
-      {/* Modal for adding a policy */}
-      <Modal
-        title="Add New Policy"
-        visible={isModalVisible}
-        onCancel={handleCancel}
-        footer={null}
-        centered
-        className="max-w-lg"
-      >
-        <Form layout="vertical" form={form} onFinish={onFinish}>
-          {/* Company dropdown */}
-          <Form.Item
-            label="Company"
-            name="companyId"
-            rules={[{ required: true, message: 'Please select a company!' }]}
-          >
-            <Select
-              placeholder="Select a company"
-              loading={companiesPending}
-              disabled={companiesPending}
+        {/* Modal for adding a policy */}
+        <Modal
+          title="Add New Policy"
+          visible={isModalVisible}
+          onCancel={handleCancel}
+          footer={null}
+          centered
+          className="max-w-lg"
+        >
+          <Form layout="vertical" form={form} onFinish={onFinish}>
+            {/* Company dropdown */}
+            <Form.Item
+              label="Company"
+              name="companyId"
+              rules={[{ required: true, message: 'Please select a company!' }]}
             >
-              {companies && companies.map(company => (
-                <Select.Option key={company.id} value={company.id}>
-                  {company.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
+              <Select
+                placeholder="Select a company"
+                loading={companiesPending}
+                disabled={companiesPending}
+              >
+                {companies && companies.map(company => (
+                  <Select.Option key={company.id} value={company.id}>
+                    {company.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-          <Form.Item
-            label="Policy Name"
-            name="policyName"
-            rules={[{ required: true, message: 'Please input the policy name!' }]}
-          >
-            <Input placeholder="Enter policy name" />
-          </Form.Item>
+            {/* Insurer dropdown */}
+            <Form.Item
+              label="Insurer"
+              name="insurerId"
+              rules={[{ required: true, message: 'Please select an insurer!' }]}
+            >
+              <Select
+                placeholder="Select an insurer"
+                loading={insurersPending}
+                disabled={insurersPending}
+              >
+                {insurers && insurers.map(insurer => (
+                  <Select.Option key={insurer.id} value={insurer.id}>
+                    {insurer.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-          <Form.Item
-            label="Policy Number"
-            name="policyNumber"
-            rules={[{ required: true, message: 'Please input the policy number!' }]}
-          >
-            <Input placeholder="Enter policy number" />
-          </Form.Item>
+            <Form.Item
+              label="Policy Name"
+              name="policyName"
+              rules={[{ required: true, message: 'Please input the policy name!' }]}
+            >
+              <Input placeholder="Enter policy name" />
+            </Form.Item>
 
-          <Form.Item
-            label="Insurer"
-            name="insurer"
-            rules={[{ required: true, message: 'Please input the insurer name!' }]}
-          >
-            <Input placeholder="Enter insurer name" />
-          </Form.Item>
+            <Form.Item
+              label="Policy Number"
+              name="policyNumber"
+              rules={[{ required: true, message: 'Please input the policy number!' }]}
+            >
+              <Input placeholder="Enter policy number" />
+            </Form.Item>
 
-          <Form.Item
-            label="Status"
-            name="status"
-            rules={[{ required: true, message: 'Please select the policy status!' }]}
-          >
-            <Select placeholder="Select status">
-              <Select.Option value="ACTIVE">Active</Select.Option>
-              <Select.Option value="INACTIVE">Inactive</Select.Option>
-            </Select>
-          </Form.Item>
+            <Form.Item
+              label="Status"
+              name="status"
+              rules={[{ required: true, message: 'Please select the policy status!' }]}
+            >
+              <Select placeholder="Select status">
+                <Select.Option value="ACTIVE">Active</Select.Option>
+                <Select.Option value="INACTIVE">Inactive</Select.Option>
+              </Select>
+            </Form.Item>
 
-          <Form.Item
-            label="Expiration Date"
-            name="expirationDate"
-            rules={[{ required: true, message: 'Please select an expiration date!' }]}
-          >
-            <DatePicker style={{ width: '100%' }} />
-          </Form.Item>
+            <Form.Item
+              label="Expiration Date"
+              name="expirationDate"
+              rules={[{ required: true, message: 'Please select an expiration date!' }]}
+            >
+              <DatePicker style={{ width: '100%' }} />
+            </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit" className="w-full">
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" className="w-full">
+                Submit
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
 
-      {/* Policies Table */}
-      <div className="flex-grow">
+        {/* Policies Table */}
+        <div className="flex-grow">
           <Table
             columns={columns}
             dataSource={policies as any}
@@ -207,9 +235,8 @@ export default function PoliciesPage() {
             style={{ width: '100%' }}
             loading={policiesPending}
           />
+        </div>
       </div>
-      </div>
-
     </div>
   );
 }
