@@ -83,11 +83,13 @@ export const GET = async (req: NextRequest,res:NextResponse) => {
         include:{
           insurer:true,
           company:true
+        },
+        orderBy: {
+          createdAt: 'desc',
         }
       })
       return NextResponse.json(data, { status: 201 });
     } catch (error:any) {
-      // Handle errors, like unique constraint violations
       return NextResponse.json(
         { error: 'Error fetching', details: error.message  },
         { status: 500 }

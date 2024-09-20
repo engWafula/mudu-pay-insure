@@ -7,6 +7,9 @@ export const GET = async (req: NextRequest,res:NextResponse) => {
         include: {
           admin: true, 
         },
+        orderBy: {
+          timestamp: 'desc',
+        },
       })
 
   

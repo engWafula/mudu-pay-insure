@@ -62,7 +62,11 @@ export const POST = async (req: NextRequest) => {
 
 export const GET = async (req: NextRequest,res:NextResponse) => {
   try {
-    const data = await db.company.findMany()
+    const data = await db.company.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      }
+    })
 
     return NextResponse.json(data, { status: 201 });
   } catch (error:any) {

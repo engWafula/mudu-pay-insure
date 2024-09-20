@@ -8,9 +8,9 @@ export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
   // Ensure the session exists (user is authenticated)
-//   if (!session) {
-//     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-//   }
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     // Parse the request body
@@ -37,24 +37,24 @@ export async function POST(req: Request) {
     });
 
     // Get admin based on the session email
-    // const admin = await db.admin.findFirst({
-    //   where: {
-    //     //@ts-ignore
-    //     email: session?.user?.email,  // Access the email from the session object
-    //   },
-    // });
+    const admin = await db.admin.findFirst({
+      where: {
+        //@ts-ignore
+        email: session?.user?.email,  // Access the email from the session object
+      },
+    });
 
-    // if (!admin) {
-    //   return NextResponse.json({ error: 'Admin not found' }, { status: 404 });
-    // }
+    if (!admin) {
+      return NextResponse.json({ error: 'Admin not found' }, { status: 404 });
+    }
 
-    // Log the action of creating an insurer
-    // await logAction(
-    //   admin.id,
-    //   'CREATE',
-    //   `Insurer ID ${insurer.id}`,
-    //   `Created new insurer with ID ${insurer.id}`
-    // );
+    //Log the action of creating an insurer
+    await logAction(
+      admin.id,
+      'CREATE',
+      `Insurer ID ${insurer.id}`,
+      `Created new insurer : ${insurer.name}`
+    );
 
     return NextResponse.json(insurer, { status: 201 });
   } catch (error) {
@@ -70,7 +70,11 @@ export async function POST(req: Request) {
 
 export const GET = async (req: NextRequest,res:NextResponse) => {
     try {
-      const data = await db.insurer.findMany()
+      const data = await db.insurer.findMany({
+        orderBy: {
+          createdAt: 'desc',
+        }
+      })
     
       return NextResponse.json(data, { status: 201 });
     } catch (error:any) {

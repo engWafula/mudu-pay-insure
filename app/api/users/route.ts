@@ -3,7 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const GET = async (req: NextRequest,res:NextResponse) => {
     try {
-      const data = await db.admin.findMany()
+      const data = await db.admin.findMany({
+        orderBy: {
+          createdAt: 'desc',
+        }
+      })
 
   
       return NextResponse.json(data, { status: 201 });
@@ -15,3 +19,5 @@ export const GET = async (req: NextRequest,res:NextResponse) => {
       );
     }
   };
+
+

@@ -49,19 +49,19 @@ export default function Page() {
       title: 'Admin Email',
       dataIndex: 'admin',
       key: 'adminEmail',
-      render: (admin: { email: string }) => admin.email, // Show admin email
+      render: (admin: { email: string }) => admin?.email || "N/A", // Show admin email
     },
     {
       title: 'Admin Name',
       dataIndex: 'admin',
       key: 'adminName',
-      render: (admin: { name: string }) => admin.name, // Show admin name
+      render: (admin: { name: string }) => admin?.name || "N/A", // Show admin name
     },
     {
       title: 'Admin Role',
       dataIndex: 'admin',
       key: 'adminRole',
-      render: (admin: { role: string }) => admin.role, // Show admin role
+      render: (admin: { role: string }) => admin?.role || "N/A", // Show admin role
     },
   ];
 
