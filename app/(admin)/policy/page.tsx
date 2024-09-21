@@ -1,7 +1,7 @@
 "use client";
 //@ts-ignore
 import React, { useState } from 'react';
-import { Table, Button, Modal, Form, Input, Select, DatePicker, message } from 'antd';
+import { Table, Button, Modal, Form, Input, Select, DatePicker, message, Popconfirm } from 'antd';
 import moment from 'moment';
 import { useFetch } from '@/app/hooks/useFetch';
 
@@ -28,8 +28,10 @@ interface Insurer {
 }
 
 export default function PoliciesPage() {
-  // State to manage modal visibility
+  // State to manage modal visibility and edit mode
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null);
   const [form] = Form.useForm();
 
   // Fetching policies, companies, and insurers using the useFetch hook
@@ -37,41 +39,73 @@ export default function PoliciesPage() {
   const { data: companies, isPending: companiesPending } = useFetch<Company[]>('/api/companies');
   const { data: insurers, isPending: insurersPending } = useFetch<Insurer[]>('/api/insurer');
 
-  // Function to show the modal
-  const showModal = () => {
+  // Function to show the modal for adding or editing
+  const showModal = (policy?: Policy) => {
+    if (policy) {
+      setSelectedPolicy(policy);
+      setIsEditMode(true);
+      form.setFieldsValue({
+        ...policy,
+        expirationDate: moment(policy.expirationDate), // Set expiration date for edit mode
+      });
+    }
     setIsModalVisible(true);
   };
 
   // Function to handle modal cancellation
   const handleCancel = () => {
     setIsModalVisible(false);
+    setIsEditMode(false);
     form.resetFields(); // Reset the form fields when the modal is closed
+    setSelectedPolicy(null);
   };
 
-  // Function to handle form submission and add a new policy
+  // Function to handle form submission for adding or updating a policy
   const onFinish = async (values: Omit<Policy, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
-      const response = await fetch('/api/policies', {
-        method: 'POST',
+      const url = isEditMode ? `/api/policies/${selectedPolicy?.id}` : `/api/policies`;
+      const method = isEditMode ? 'PUT' : 'POST';
+      const body = {
+        ...values,
+        expirationDate: values.expirationDate?.toString(), 
+      };
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...values,
-          expirationDate: values.expirationDate?.toString(), // Format the date properly
-        }),
+        body: JSON.stringify(body),
       });
 
       if (response.ok) {
-        message.success('Policy added successfully!');
+        message.success(`Policy ${isEditMode ? 'updated' : 'added'} successfully!`);
         form.resetFields(); // Reset form after successful submission
         setIsModalVisible(false); // Close modal
         refetchPolicies(); // Refetch the policies to update the table
       } else {
-        throw new Error('Failed to add policy');
+        throw new Error('Failed to save policy');
       }
     } catch (error) {
-      message.error('Error adding policy');
+      message.error(`Error ${isEditMode ? 'updating' : 'adding'} policy`);
+    }
+  };
+
+  // Function to delete a policy
+  const handleDelete = async (policyId: string) => {
+    try {
+      const response = await fetch(`/api/policies/${policyId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        message.success('Policy deleted successfully!');
+        refetchPolicies(); // Refetch policies to update the table
+      } else {
+        throw new Error('Failed to delete policy');
+      }
+    } catch (error) {
+      message.error('Error deleting policy');
     }
   };
 
@@ -92,7 +126,7 @@ export default function PoliciesPage() {
       dataIndex: 'company',
       key: 'company',
       render: (company: any) => {
-        return company.name
+        return company.name;
       },
     },
     {
@@ -121,6 +155,27 @@ export default function PoliciesPage() {
       key: 'createdAt',
       render: (text: string) => moment(text).format('YYYY-MM-DD'),
     },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (text: any, record: Policy) => (
+        <span>
+          <Button type="link" onClick={() => showModal(record)}>
+            Edit
+          </Button>
+          <Popconfirm
+            title="Are you sure to delete this policy?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="link" danger>
+              Delete
+            </Button>
+          </Popconfirm>
+        </span>
+      ),
+    },
   ];
 
   return (
@@ -129,14 +184,14 @@ export default function PoliciesPage() {
       <h2 className="text-2xl font-semibold text-gray-700 mt-10 overflow-hidden">Policies</h2>
       <div className="mt-5">
         <div className="flex items-center justify-between mb-4">
-          <Button type="primary" onClick={showModal} disabled={companiesPending || insurersPending}>
+          <Button type="primary" onClick={() => showModal()} disabled={companiesPending || insurersPending}>
             Add Policy
           </Button>
         </div>
 
-        {/* Modal for adding a policy */}
+        {/* Modal for adding or editing a policy */}
         <Modal
-          title="Add New Policy"
+          title={isEditMode ? "Edit Policy" : "Add New Policy"}
           visible={isModalVisible}
           onCancel={handleCancel}
           footer={null}
@@ -219,23 +274,14 @@ export default function PoliciesPage() {
 
             <Form.Item>
               <Button type="primary" htmlType="submit" className="w-full">
-                Submit
+                {isEditMode ? 'Update Policy' : 'Add Policy'}
               </Button>
             </Form.Item>
           </Form>
         </Modal>
 
         {/* Policies Table */}
-        <div className="flex-grow">
-          <Table
-            columns={columns}
-            dataSource={policies as any}
-            rowKey="id"
-            pagination={{ pageSize: 5 }}
-            style={{ width: '100%' }}
-            loading={policiesPending}
-          />
-        </div>
+        <Table columns={columns} dataSource={policies} loading={policiesPending} rowKey="id"  pagination={{defaultPageSize:20}}/>
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
 "use client"; // necessary for Next.js to handle the client-side rendering
 
 import React, { useState } from 'react';
-import { Table, Button, Modal, Form, Input, message } from 'antd';
+import { Table, Button, Modal, Form, Input, message, Popconfirm } from 'antd';
 import { useFetch } from '@/app/hooks/useFetch'; // Ensure this hook is adjusted for your needs
+import moment from 'moment';
 
 interface Insurer {
   id: string;
@@ -17,15 +18,19 @@ interface Insurer {
 }
 
 export default function Page() {
-  // State to manage modal visibility
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
+  const [editingInsurer, setEditingInsurer] = useState<Insurer | null>(null); // State to handle the insurer being edited
 
   // Fetching data using the useFetch hook
   const { data: insurers, isPending, error, refetch } = useFetch<Insurer[]>('/api/insurer'); // Adjust the endpoint
 
   // Function to show the modal
-  const showModal = () => {
+  const showModal = (insurer?: Insurer) => {
+    if (insurer) {
+      setEditingInsurer(insurer);
+      form.setFieldsValue(insurer); // Set the form fields for editing
+    }
     setIsModalVisible(true);
   };
 
@@ -33,13 +38,17 @@ export default function Page() {
   const handleCancel = () => {
     setIsModalVisible(false);
     form.resetFields(); // Reset the form fields when the modal is closed
+    setEditingInsurer(null); // Reset editing state
   };
 
-  // Function to handle form submission and add a new insurer
+  // Function to handle form submission for adding or updating an insurer
   const onFinish = async (values: Omit<Insurer, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
-      const response = await fetch('/api/insurer', {
-        method: 'POST',
+      const method = editingInsurer ? 'PUT' : 'POST'; // Determine if it's an update or add
+      const url = editingInsurer ? `/api/insurer/${editingInsurer.id}` : '/api/insurer';
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -47,15 +56,35 @@ export default function Page() {
       });
 
       if (response.ok) {
-        message.success('Insurer added successfully!');
+        const successMessage = editingInsurer ? 'Insurer updated successfully!' : 'Insurer added successfully!';
+        message.success(successMessage);
         form.resetFields(); // Reset form after successful submission
         setIsModalVisible(false); // Close modal
+        setEditingInsurer(null); // Reset editing state
         refetch(); // Refetch the insurers to update the table
       } else {
-        throw new Error('Failed to add insurer');
+        throw new Error('Failed to submit insurer data');
       }
     } catch (error) {
-      message.error('Error adding insurer');
+      message.error('Error submitting insurer data');
+    }
+  };
+
+  // Function to delete an insurer
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/insurer/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        message.success('Insurer deleted successfully!');
+        refetch(); // Refetch the insurers to update the table
+      } else {
+        throw new Error('Failed to delete insurer');
+      }
+    } catch (error) {
+      message.error('Cannot delete an insurer who is has a policy');
     }
   };
 
@@ -95,29 +124,46 @@ export default function Page() {
       title: 'Created At',
       dataIndex: 'createdAt',
       key: 'createdAt',
+      render: (text: string) => moment(text).format('YYYY-MM-DD'),
+
     },
     {
-      title: 'Updated At',
-      dataIndex: 'updatedAt',
-      key: 'updatedAt',
+      title: 'Actions',
+      key: 'actions',
+      render: (text: string, record: Insurer) => (
+        <div>
+          <Button onClick={() => showModal(record)} type="link">
+            Edit
+          </Button>
+          <Popconfirm
+            title="Are you sure to delete this insurer?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="link" danger>
+              Delete
+            </Button>
+          </Popconfirm>
+        </div>
+      ),
     },
   ];
 
   return (
     <div className="flex flex-col justify-start p-2">
-      {/* Header and Button */}
       <h2 className="text-2xl font-semibold text-gray-700 mt-10 overflow-hidden">Insurers</h2>
       <div className="mt-5">
 
         <div className="flex items-center justify-between mb-4">
-          <Button type="primary" onClick={showModal}>
+          <Button type="primary" onClick={() => showModal()}>
             Add Insurer
           </Button>
         </div>
 
-        {/* Modal for adding an insurer */}
+        {/* Modal for adding or editing an insurer */}
         <Modal
-          title="Add New Insurer"
+          title={editingInsurer ? 'Edit Insurer' : 'Add New Insurer'}
           visible={isModalVisible}
           onCancel={handleCancel}
           footer={null}
@@ -183,7 +229,7 @@ export default function Page() {
             columns={columns}
             dataSource={insurers as Insurer[]}
             rowKey="id"
-            pagination={{ pageSize: 5 }}
+            pagination={{ pageSize: 20}}
             scroll={{ x: true }} 
             loading={isPending}
           />

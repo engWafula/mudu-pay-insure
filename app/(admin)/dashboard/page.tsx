@@ -56,7 +56,7 @@ export default function Page() {
 
 
   return (
-    <div className="flex flex-col items-center space-y-12 p-6 md:p-8 bg-[#ffffff] min-h-screen">
+    <div className="flex flex-col items-center space-y-12 p-6 md:p-8 bg-[#ffffff] ">
       {/* Dashboard Header */}
       <p className="text-2xl md:text-4xl font-bold text-gray-800 mb-4">System Analytics</p>
 

@@ -31,14 +31,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
         password,
       });
       setIsLoading(false);
-      console.log(result?.error,"amaaaha")
       
       if (result?.error) {
         setIsLoading(false);
         setError("Invalid Email or Password");
       } else {
-        message.success("Login Successful")
-        router.push('/dashboard')      }
+        message.success("Login Successful");
+        router.push("/dashboard");
+      }
     } else if (type === "register") {
       try {
         const response = await fetch("/api/signin", {
@@ -56,7 +56,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
           setError(result.error);
           setIsLoading(false);
         } else {
-          message.success("Account created successfully")
+          message.success("Account created successfully");
           router.push("/signin");
         }
       } catch (error) {
@@ -67,13 +67,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center sm:py-12">
-      <div className="p-10  xs:p-0 mx-auto md:w-full md:max-w-lg">
-        <h1 className="font-bold text-center text-2xl mb-5">
-          {type === "login" ? "Login" : "Register"}
+    <div className="flex flex-col justify-center sm:py-12 ">
+      <div className="p-8 xs:p-0 mx-auto w-full md:max-w-2xl"> {/* Increase width */}
+        <h1 className="font-bold text-center text-2xl md:text-3xl mb-7"> {/* Increase text size */}
+          {type === "login" ? " Admin Login" : "Register"}
         </h1>
-        <div className="bg-white shadow w-full  rounded-lg divide-y divide-gray-200">
-          <form className="px-5 py-7">
+        <div className="bg-white shadow-md w-full rounded-md"> {/* Increased shadow */}
+          <form className="px-10 py-12 mt-10"> {/* Increased padding */}
             <FormInput
               label="E-mail"
               type="email"
@@ -102,12 +102,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
             />
             <button
               onClick={handleSubmit}
-              className="transition duration-200 bg-blue-500 hover:bg-blue-600 text-white w-full py-2.5 rounded-lg text-sm shadow-sm hover:shadow-md font-semibold text-center inline-block"
+              className="transition duration-200 bg-[#1F2937] hover:bg-[#1F2937] text-white w-full py-3 rounded-lg text-sm shadow-lg hover:shadow-2xl font-semibold text-center inline-block" 
               disabled={isLoading}
             >
               {isLoading ? (
                 <Spin className="text-white" indicator={<LoadingOutlined  style={{ fontSize: 24, color: 'white' }} spin />} />
-
               ) : (
                 <span className="inline-block mr-2">
                   {type === "login" ? "Login" : "Register"}
@@ -115,28 +114,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
               )}
             </button>
             {error && (
-              <div className="flex items-center justify-center mt-2">
+              <div className="flex items-center justify-center mt-4">
                 <p className="font-semibold mt-5 text-sm text-red-500 pb-1 block">
                   {error}
                 </p>
               </div>
             )}
           </form>
-          <div className="py-5">
-            <div className="grid grid-cols-2 gap-1">
-              {type === "login" ? (
-                <AuthFooter
-                  link="signup"
-                  title="Don't have an account? Register"
-                />
-              ) : (
-                <AuthFooter
-                  link="signin"
-                  title="Already have an account? Login"
-                />
-              )}
-            </div>
-          </div>
         </div>
       </div>
     </div>

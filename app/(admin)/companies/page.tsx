@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Table, Button, Modal, Form, Input, message, Popconfirm } from 'antd';
 import { useFetch } from '@/app/hooks/useFetch';
+import moment from 'moment';
 
 interface Company {
   id: string;
@@ -103,11 +104,7 @@ export default function Page() {
       title: 'Created At',
       dataIndex: 'createdAt',
       key: 'createdAt',
-    },
-    {
-      title: 'Updated At',
-      dataIndex: 'updatedAt',
-      key: 'updatedAt',
+      render: (text: string) => moment(text).format('YYYY-MM-DD'),
     },
     {
       title: 'Actions',
@@ -182,7 +179,7 @@ export default function Page() {
             columns={columns}
             dataSource={companies as Company[]}
             rowKey="id"
-            pagination={{ pageSize: 5 }}
+            pagination={{ defaultPageSize: 20 }}
             scroll={{ x: true }}
             loading={isPending}
           />
