@@ -10,7 +10,6 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { data: session, status } = useSession();
 
-   console.log(session,">>????")
   return (
     <header className="bg-gray-800 py-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
@@ -41,6 +40,12 @@ export default function Header() {
               >
                 Sign Out
               </button>
+              <Link
+              href="/dashboard"
+                className="bg-gray-700 text-white px-5 py-2 rounded-md hover:bg-gray-600"
+              >
+                Dashboard
+              </Link>
             </>
           ) : (
             <>

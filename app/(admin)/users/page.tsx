@@ -63,7 +63,7 @@ export default function Page() {
 
         const newUser: User = await response.json();
         refetch()
-        message.success('User added successfully!');
+        message.success('User added successfully, Email has been sent with login credentials');
       } catch (error) {
         message.error('Failed to add user');
       }
